@@ -98,7 +98,7 @@ Output this JSON:
 }`;
 
   const res = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514", max_tokens: 2500,
+    model: "claude-sonnet-4-6", max_tokens: 2500,
     messages: [{ role: "user", content: prompt }],
   });
   const text = res.content[0].type === "text" ? res.content[0].text : "{}";
