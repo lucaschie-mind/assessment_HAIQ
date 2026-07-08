@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     postTestAvgC: avg(postTestData?.blockC), postTestAvgD: avg(postTestData?.blockD),
   }});
 
-  //evalAsync(sessionId, session.logs, session.caseId, postTestData || {}, finalOutput || "");
+  evalAsync(sessionId, session.logs, session.caseId, postTestData || {}, finalOutput || "");
   return NextResponse.json({ ok: true });
 }
 
