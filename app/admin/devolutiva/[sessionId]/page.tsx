@@ -15,10 +15,26 @@ interface Evaluation {
   evaluationPath: string; evaluatedAt: string;
 }
 
+interface ConfigDevolutiva {
+  mostrarMetodologia: boolean;
+  mostrarAgencia: boolean;
+  mostrarPareceres: boolean;
+  mostrarGaps: boolean;
+}
+
+// Fallback: API antiga sem config → mostra tudo
+const CONFIG_PADRAO: ConfigDevolutiva = {
+  mostrarMetodologia: true,
+  mostrarAgencia: true,
+  mostrarPareceres: true,
+  mostrarGaps: true,
+};
+
 interface Result {
   session: { id: string; candidateName: string; caseId: string; startedAt: string; completedAt: string };
   evaluation: Evaluation | null;
   logCount: number;
+  config?: ConfigDevolutiva;
 }
 
 const DC: Record<string, string> = { D1: "#534AB7", D2: "#0F6E56", D3: "#185FA5", D4: "#854F0B" };
@@ -58,6 +74,7 @@ export default function AdminDevolutivaPage() {
   );
 
   const { session, evaluation } = result;
+  const config = result.config ?? CONFIG_PADRAO;
   const haiq = haiqCategory(evaluation.haiqScore);
 
   return (
@@ -126,6 +143,7 @@ export default function AdminDevolutivaPage() {
           </div>
 
           {/* Agency */}
+          {config.mostrarAgencia && (
           <div style={{ background: "#fff", borderRadius: 12, padding: "1.25rem 1.5rem", marginBottom: "1.25rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: "#042C53", marginBottom: 10 }}>Índice de Agência Humana</div>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
@@ -141,8 +159,10 @@ export default function AdminDevolutivaPage() {
               {evaluation.evidenceAgency?.interpretation && <span> · {evaluation.evidenceAgency.interpretation}</span>}
             </div>
           </div>
+          )}
 
           {/* Pareceres */}
+          {config.mostrarPareceres && (
           <div style={{ background: "#fff", borderRadius: 12, padding: "1.25rem 1.5rem", marginBottom: "1.25rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: "#042C53", marginBottom: "1rem" }}>Pareceres por Dimensão</div>
             {(["D1","D2","D3","D4"] as const).map(dim => (
@@ -162,9 +182,10 @@ export default function AdminDevolutivaPage() {
               </div>
             )}
           </div>
+          )}
 
           {/* Gaps */}
-          {evaluation.gapsJson?.length > 0 && (
+          {config.mostrarGaps && evaluation.gapsJson?.length > 0 && (
             <div style={{ background: "#fff", borderRadius: 12, padding: "1.25rem 1.5rem", marginBottom: "1.25rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#042C53", marginBottom: "1rem" }}>Gaps Identificados</div>
               {evaluation.gapsJson.map((gap, i) => (
@@ -180,7 +201,7 @@ export default function AdminDevolutivaPage() {
           )}
 
           {/* Interview questions */}
-          {evaluation.gapsJson?.length > 0 && (
+          {config.mostrarGaps && evaluation.gapsJson?.length > 0 && (
             <div style={{ background: "#fff", borderRadius: 12, padding: "1.25rem 1.5rem", marginBottom: "1.25rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }} className="page-break">
               <div style={{ fontSize: 14, fontWeight: 700, color: "#042C53", marginBottom: "1rem" }}>Perguntas Sugeridas para Entrevista</div>
               {evaluation.gapsJson.map((gap, i) => (
