@@ -20,11 +20,27 @@ interface SessionData {
   durationSeconds: number;
 }
 
+interface ConfigDevolutiva {
+  mostrarMetodologia: boolean;
+  mostrarAgencia: boolean;
+  mostrarPareceres: boolean;
+  mostrarGaps: boolean;
+}
+
 interface Result {
   session: SessionData;
   evaluation: Evaluation | null;
   logCount: number;
+  config?: ConfigDevolutiva;
 }
+
+// Fallback: se a API não mandar config (versão antiga), mostra tudo.
+const CONFIG_PADRAO: ConfigDevolutiva = {
+  mostrarMetodologia: true,
+  mostrarAgencia: true,
+  mostrarPareceres: true,
+  mostrarGaps: true,
+};
 
 const DIMS = [
   {
@@ -116,6 +132,7 @@ export default function DevolutivaPage() {
   );
 
   const { session, evaluation } = result;
+  const config = result.config ?? CONFIG_PADRAO;
   const name = session.candidateName.split(" ")[0];
 
   return (
@@ -139,6 +156,7 @@ export default function DevolutivaPage() {
         </div>
 
         {/* Metodologia */}
+        {config.mostrarMetodologia && (
         <div style={{ ...s.card, marginBottom: "1.5rem" }}>
           <h2 style={s.sectionTitle}>O que é o HAI-Q?</h2>
           <p style={s.bodyText}>
@@ -156,8 +174,10 @@ export default function DevolutivaPage() {
             ))}
           </div>
         </div>
+        )}
 
         {/* Agência */}
+        {config.mostrarAgencia && (
         <div style={{ ...s.card, marginBottom: "1.5rem" }}>
           <h2 style={s.sectionTitle}>Como foi a colaboração?</h2>
           <p style={s.bodyText}>
@@ -172,8 +192,10 @@ export default function DevolutivaPage() {
               : "A IA teve papel predominante na construção do resultado. Desenvolver mais sua capacidade de filtrar e adaptar o que ela oferece é o principal ponto de crescimento."}
           </p>
         </div>
+        )}
 
         {/* Pareceres por dimensão */}
+        {config.mostrarPareceres && (
         <div style={{ ...s.card, marginBottom: "1.5rem" }}>
           <h2 style={s.sectionTitle}>O que foi observado</h2>
           <p style={{ ...s.bodyText, marginBottom: "1.5rem" }}>A seguir, o que o avaliador identificou em cada uma das quatro dimensões a partir da sua interação.</p>
@@ -195,9 +217,10 @@ export default function DevolutivaPage() {
             </div>
           )}
         </div>
+        )}
 
         {/* Pontos de desenvolvimento */}
-        {evaluation.gapsJson?.length > 0 && (
+        {config.mostrarGaps && evaluation.gapsJson?.length > 0 && (
           <div style={{ ...s.card, marginBottom: "1.5rem" }}>
             <h2 style={s.sectionTitle}>Pontos de desenvolvimento</h2>
             <p style={{ ...s.bodyText, marginBottom: "1.25rem" }}>Estas são as áreas onde há maior espaço para crescimento na sua forma de colaborar com IA.</p>
