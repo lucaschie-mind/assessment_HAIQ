@@ -28,10 +28,14 @@ model Session {
   postTestAvgD      Float?
   logs              Log[]
   evaluation        Evaluation?
+  tenantId String?                                                    // ← ADICIONAR
+  tenant   Tenant?  @relation(fields: [tenantId], references: [id])   // ← ADICIONAR
+  invite   Invite? 
 
   @@index([candidateEmail])
   @@index([caseId])
   @@index([startedAt])
+  @@index([tenantId]) 
 }
 
 model Log {
@@ -77,4 +81,48 @@ model Evaluation {
   evaluationPath  String?
   evaluatedAt     DateTime @default(now())
   session         Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+enum InviteStatus {
+  PENDING
+  STARTED
+  COMPLETED
+  CANCELED
+}
+
+model Tenant {
+  id           String   @id @default(uuid())
+  slug         String   @unique
+  nome         String
+  reportConfig Json?
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+
+  invites  Invite[]
+  sessions Session[]
+
+  @@index([slug])
+}
+
+model Invite {
+  id       String       @id @default(uuid())
+  tenantId String
+  email    String
+  nome     String?
+  status   InviteStatus @default(PENDING)
+
+  criadoEm     DateTime  @default(now())
+  enviadoEm    DateTime?
+  iniciadoEm   DateTime?
+  concluidoEm  DateTime?
+  canceladoEm  DateTime?
+  canceladoPor String?
+
+  sessionId String?  @unique
+  session   Session? @relation(fields: [sessionId], references: [id])
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, email])
+  @@index([tenantId, status])
+  @@index([email])
 }
